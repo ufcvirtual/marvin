@@ -1,4 +1,4 @@
-  /*
+﻿  /*
    * Name RC522DumpMifare.ino
    *
    * 2013-07-xx started
@@ -11,7 +11,7 @@
    * TODO: 
    *  - ISO/IEC 14443-4
    *  - Auth 7byte
-   *  
+   *  teste no windows
    */
   
   // the sensor communicates using SPI, so include the library:
