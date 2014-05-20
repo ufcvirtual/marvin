@@ -1,11 +1,5 @@
 -----------------------------
 Cloque seu nome aqui:
 
-<<<<<<< HEAD
 1.Davi Antunes de A. G.
-2.Yure Vieira Sampaio Albuquerque
-
-
-=======
-1.Davi Antunes
->>>>>>> parent of e861cd9... [#71316818] Meu primeiro commit
+2.Yure Vieira
