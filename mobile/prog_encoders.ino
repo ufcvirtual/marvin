@@ -1,11 +1,11 @@
-#define PASSOS 40
+#define PASSOS 20//40
 #define _PWM 255
 
 mobile mobil(2,3,4,5,9,10,A0,A1);//(a,b,c,d) = pinos de saida para o drive;(e,f) = pinos de pwm;(g,h) = pinos de encoder
 Radio radio(8,7,10,"carro",sizeof(long));
 byte dado; //dado recebido pela serial ou bluetooth
 uint8_t radio_dado[4];//dado recebido pelo radio
-
+//byte dados[21];
 void setup(){
   Serial.begin(9600);
 }
@@ -21,13 +21,13 @@ void loop(){
     dado = Serial.read();
   }  
   /******************************************/
-  if(dado == 'U' || radio_dado[0] == 'U'){
+  if(dado == 'F' || radio_dado[0] == 'F'){
     Serial.println("Frente");
-    mobil.forward(PASSOS,_PWM);
+    mobil.forward(PASSOS+6,_PWM);
   }
-  if(dado == 'D' || radio_dado[0] == 'D'){
+  if(dado == 'B' || radio_dado[0] == 'B'){
     Serial.println("Ré");
-    mobil.back(PASSOS,_PWM);
+    mobil.back(PASSOS+6,_PWM);
   }
   if(dado == 'L' || radio_dado[0] == 'L'){
     Serial.println("Esquerda");

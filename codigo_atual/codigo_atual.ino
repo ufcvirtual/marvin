@@ -3,7 +3,7 @@
 #include <Mirf.h>
 #include <nRF24L01.h>
 #include <MirfHardwareSpiDriver.h>
-#define Delay 630
+#define Delay 300
 
 union aux{
   unsigned long longs;
@@ -36,13 +36,13 @@ void loop(){
   if(Serial.available()){
     dado.bytes[0] = Serial.read();
   }  
-  if(dado.bytes[0] == 'U' ){
+  if(dado.bytes[0] == 'F' ){
     Serial.println("Frente");
     frente();
     delay(Delay);
     parar();
   }
-  if(dado.bytes[0] == 'D' ){
+  if(dado.bytes[0] == 'B' ){
     Serial.println("Ré");
     re();
     delay(Delay);

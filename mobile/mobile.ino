@@ -2,7 +2,7 @@
 /*********************************CLASSE****************************************************/
 /*******************************************************************************************/
 #define BRAKING_POINT 1
-#define COUNT 100
+#define ANALOG_MIN 200
 class mobile{
 private:
   //Pinos de acionamento do drive dos motores
@@ -35,10 +35,10 @@ public:
   void left(uint16_t steps,uint16_t pwm);
   void right(uint16_t steps,uint16_t pwm);
   void back(uint16_t steps,uint16_t pwm); 
-  void right_direct();
-  void right_reverse();
-  void left_direct();
-  void left_reverse();
+  void right_direct(uint8_t speed);
+  void right_reverse(uint8_t speed);
+  void left_direct(uint8_t speed);
+  void left_reverse(uint8_t speed);
 
 };
 /********************************************************************************************/
@@ -60,16 +60,15 @@ mobile::mobile(uint16_t pin1,uint16_t pin2,uint16_t pin3,uint16_t pin4,uint16_t 
 }
 /********************************************************************************************/
 void mobile::forward(uint16_t steps,uint16_t pwm){
-  analogWrite(pin_pwm_L,pwm);
-  analogWrite(pin_pwm_R,pwm);
   encoder_L = 0;
   encoder_R = 0;
   uint16_t status_R = analog_read(pin_enc_R,500);
   uint16_t status_L = analog_read(pin_enc_L,500);
   boolean flag_L = true,flag_R = true;
-  right_direct();
-  left_direct();
+  right_direct(pwm);
+  left_direct(pwm);
   uint8_t aux_R = 0,aux_L = 0;
+  uint8_t speed = pwm;
   while(encoder_R <= steps ||encoder_L <= steps ){
     uint16_t read_R = analog_read(pin_enc_R,500);
     //verificar o estado do encoder
@@ -79,7 +78,8 @@ void mobile::forward(uint16_t steps,uint16_t pwm){
       flag_R = stop_R();//parar roda direita 
       //delay(10);
       //Serial.print("encoder_R: ");
-      //Serial.println(encoder_R);
+      Serial.print("\t\t");
+      Serial.println(encoder_R);
     }
     uint16_t read_L = analog_read(pin_enc_L,500);
     if(read_L != status_L){
@@ -88,22 +88,35 @@ void mobile::forward(uint16_t steps,uint16_t pwm){
       flag_L = stop_L();//parar roda esquerda
       //delay(10); 
       //Serial.print("\t\tencoder_L: ");
-      //Serial.println(encoder_L);
+      Serial.println(encoder_L);
     }
     if(encoder_L < encoder_R && flag_R && flag_L){
       //right_direct();
-      left_direct();
+      left_direct(speed);
       flag_L = false;
     }
     if(encoder_R <= encoder_L && flag_R && flag_L){
-      right_direct();
+      right_direct(speed);
       //left_direct();
       flag_R = false;
     }
-    if(Serial.available()){
-      stop_R();
-      stop_L();
-      break;
+//    if(Serial.available()){
+//      stop_R();
+//      stop_L();
+//      break;
+//    }
+    //velocidade
+    if(speed < 255 && encoder_L < steps-BRAKING_POINT){
+      speed++; 
+      analogWrite(pin_pwm_L,speed);
+      analogWrite(pin_pwm_R,speed); 
+      //Serial.println(speed);
+    }
+    if(speed > 0 && encoder_L >= steps-1 && speed >=ANALOG_MIN){
+      speed--;
+      analogWrite(pin_pwm_L,speed);
+      analogWrite(pin_pwm_R,speed);
+     //Serial.println(speed); 
     }
   }
   stop_R();
@@ -111,16 +124,15 @@ void mobile::forward(uint16_t steps,uint16_t pwm){
 }
 /********************************************************************************************/
 void mobile::back(uint16_t steps,uint16_t pwm){
-  analogWrite(pin_pwm_L,pwm);
-  analogWrite(pin_pwm_R,pwm);
   encoder_L = 0;
   encoder_R = 0;
   uint16_t status_R = analog_read(pin_enc_R,500);
   uint16_t status_L = analog_read(pin_enc_L,500);
   boolean flag_L = true,flag_R = true;
-  right_reverse();
-  left_reverse();
+  right_reverse(pwm);
+  left_reverse(pwm);
   uint8_t aux_R = 0,aux_L = 0;
+  uint8_t speed = pwm;
   while(encoder_R <= steps ||encoder_L <= steps ){
     uint16_t read_R = analog_read(pin_enc_R,500);
     //verificar o estado do encoder
@@ -130,7 +142,7 @@ void mobile::back(uint16_t steps,uint16_t pwm){
       flag_R = stop_R();//parar roda direita
       //delay(10); 
       //Serial.print("encoder_R: ");
-      //Serial.println(encoder_R);
+      Serial.println(encoder_R);
     }
     uint16_t read_L = analog_read(pin_enc_L,500);
     if(read_L != status_L){
@@ -139,22 +151,29 @@ void mobile::back(uint16_t steps,uint16_t pwm){
       flag_L = stop_L();//parar roda esquerda 
       //delay(10);
       //Serial.print("\t\tencoder_L: ");
-      //Serial.println(encoder_L);
+      Serial.print("\t\t");
+      Serial.println(encoder_L);
     }
     if(encoder_L < encoder_R && flag_R && flag_L){
       //right_reverse();
-      left_reverse();
+      left_reverse(speed);
       flag_L = false;
     }
     if(encoder_R <= encoder_L && flag_R && flag_L){
-      right_reverse();
+      right_reverse(speed);
       //left_reverse();
       flag_R = false;
     }
-    if(Serial.available()){
-      stop_R();
-      stop_L();
-      break;
+//    if(Serial.available()){
+//      stop_R();
+//      stop_L();
+//      break;
+//    }
+    if(speed > 0 && encoder_L >= steps-BRAKING_POINT){
+      speed--;
+      analogWrite(pin_pwm_L,speed);
+      analogWrite(pin_pwm_R,speed);
+     //Serial.println(speed); 
     }
   }
   stop_R();
@@ -162,6 +181,7 @@ void mobile::back(uint16_t steps,uint16_t pwm){
 }
 /********************************************************************************************/
 void mobile::left(uint16_t steps,uint16_t pwm){
+  //Serial.println(pwm);
   analogWrite(pin_pwm_L,pwm);
   analogWrite(pin_pwm_R,pwm);
   encoder_L = 0;
@@ -170,10 +190,11 @@ void mobile::left(uint16_t steps,uint16_t pwm){
   uint16_t status_L = analog_read(pin_enc_L,500);
   boolean flag_L = true,flag_R = true;
 
-  //left_direct();
-  right_reverse();
+  left_direct(pwm);
+  //right_reverse(pwm);
 
   uint8_t aux_R = 0,aux_L = 0;
+  uint8_t speed = pwm;
   while(encoder_R <= steps || encoder_L <= steps ){
     uint16_t read_R = analog_read(pin_enc_R,500);
     //verificar o estado do encoder
@@ -183,7 +204,8 @@ void mobile::left(uint16_t steps,uint16_t pwm){
       flag_R = stop_R();//parar roda direita 
       //delay(10);
       //Serial.print("encoder_R: ");
-      //Serial.println(encoder_R);
+      Serial.print("\t\t");
+      Serial.println(encoder_R);
     }
     uint16_t read_L = analog_read(pin_enc_L,500);
     if(read_L != status_L){
@@ -192,22 +214,28 @@ void mobile::left(uint16_t steps,uint16_t pwm){
       flag_L = stop_L();//parar roda esquerda 
       //delay(10);
       //Serial.print("\t\tencoder_L: ");
-      //Serial.println(encoder_L);
+      Serial.println(encoder_L);
     }
     if(encoder_L < encoder_R && flag_R && flag_L){
-      left_direct();
+      left_direct(speed);
       //right_reverse();
       flag_L = false;
     }
     if(encoder_R <= encoder_L && flag_R && flag_L){
       //left_direct();
-      right_reverse();
+      right_reverse(speed);
       flag_R = false;
     }
-    if(Serial.available()){
-      stop_R();
-      stop_L();
-      break;
+//    if(Serial.available()){
+//      stop_R();
+//      stop_L();
+//      break;
+//    }
+    if(speed > 0 && encoder_R >= steps-BRAKING_POINT){
+      speed--;
+      analogWrite(pin_pwm_L,speed);
+      analogWrite(pin_pwm_R,speed);
+     //Serial.println(speed); 
     }
   }
   stop_R();
@@ -215,6 +243,7 @@ void mobile::left(uint16_t steps,uint16_t pwm){
 }
 /********************************************************************************************/
 void mobile::right(uint16_t steps,uint16_t pwm){
+  //Serial.println(pwm);
   analogWrite(pin_pwm_L,pwm);
   analogWrite(pin_pwm_R,pwm);
   encoder_L = 0;
@@ -222,9 +251,10 @@ void mobile::right(uint16_t steps,uint16_t pwm){
   uint16_t status_R = analog_read(pin_enc_R,500);
   uint16_t status_L = analog_read(pin_enc_L,500);
   boolean flag_L = true,flag_R = true;
-  right_direct();
-  //left_reverse();
+  right_direct(pwm);
+  //left_reverse(pwm);
   uint8_t aux_R = 0,aux_L = 0;
+  uint8_t speed = pwm;
   while(encoder_R <= steps ||encoder_L <= steps ){    
     uint16_t read_R = analog_read(pin_enc_R,500);
     //verificar o estado do encoder
@@ -234,7 +264,8 @@ void mobile::right(uint16_t steps,uint16_t pwm){
       flag_R = stop_R();//parar roda direita 
       //delay(10);
       //Serial.print("encoder_R: ");
-      //Serial.println(encoder_R);
+      Serial.print("\t\t");
+      Serial.println(encoder_R);
     }
     uint16_t read_L = analog_read(pin_enc_L,500);
     if(read_L != status_L){
@@ -243,22 +274,28 @@ void mobile::right(uint16_t steps,uint16_t pwm){
       flag_L = stop_L();//parar roda esquerda 
       //delay(10);
       //Serial.print("\t\tencoder_L: ");
-      //Serial.println(encoder_L);
+      Serial.println(encoder_L);
     }
     if(encoder_L < encoder_R && flag_R && flag_L){
       //right_direct();
-      left_reverse();
+      left_reverse(speed);
       flag_L = false;
     }
     if(encoder_R <= encoder_L && flag_R && flag_L){
-      right_direct();
+      right_direct(speed);
       //left_reverse();
       flag_R = false;
     }
-    if(Serial.available()){
-      stop_R();
-      stop_L();
-      break;
+//    if(Serial.available()){
+//      stop_R();
+//      stop_L();
+//      break;
+//    }
+    if(speed > 0 && encoder_L >= steps-BRAKING_POINT){
+      speed--;
+      analogWrite(pin_pwm_L,speed);
+      analogWrite(pin_pwm_R,speed);
+     //Serial.println(speed); 
     }
   }
   stop_R();
@@ -290,27 +327,32 @@ uint16_t mobile::analog_read(uint16_t pin,uint16_t level){
 
 }
 /********************************************************************************************/
-void mobile::right_direct(){
-  digitalWrite(in3,1);
-  digitalWrite(in4,0);
-}
-/********************************************************************************************/
-void mobile::right_reverse(){
+void mobile::right_direct(uint8_t speed){
   digitalWrite(in3,0);
   digitalWrite(in4,1);
+  analogWrite(pin_pwm_R,speed);
 }
 /********************************************************************************************/
-void mobile::left_direct(){
-  digitalWrite(in1,1);
-  digitalWrite(in2,0);
+void mobile::right_reverse(uint8_t speed){
+  digitalWrite(in3,1);
+  digitalWrite(in4,0);
+  analogWrite(pin_pwm_R,speed);
 }
 /********************************************************************************************/
-void mobile::left_reverse(){
+void mobile::left_direct(uint8_t speed){
   digitalWrite(in1,0);
   digitalWrite(in2,1);
+  analogWrite(pin_pwm_L,speed);
+}
+/********************************************************************************************/
+void mobile::left_reverse(uint8_t speed){
+  digitalWrite(in1,1);
+  digitalWrite(in2,0);
+  analogWrite(pin_pwm_L,speed);
 }
 /********************************************************************************************/
 /********************************************************************************************/
+
 
 
 
