@@ -1,11 +1,10 @@
 #define PASSOS 20//40
 #define _PWM 255
 
-mobile mobil(2,3,4,5,9,10,A0,A1);//(a,b,c,d) = pinos de saida para o drive;(e,f) = pinos de pwm;(g,h) = pinos de encoder
+mobile mobil(2,3,4,5,9,10,A0,A1);//(a,b,c,d) = pinos de saida para o drive;(e,f) = pinos de pwm;(g,h) = pinos de encoder.
 Radio radio(8,7,10,"carro",sizeof(long));
-byte dado; //dado recebido pela serial ou bluetooth
-uint8_t radio_dado[4];//dado recebido pelo radio
-//byte dados[21];
+byte dado; //dado recebido pela serial ou bluetooth.
+uint8_t radio_dado[4];//dado recebido pelo radio.
 void setup(){
   Serial.begin(9600);
 }
