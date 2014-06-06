@@ -1,4 +1,4 @@
-#define PASSOS 20//40
+#define PASSOS 22//40
 #define _PWM 255
 
 mobile mobil(2,3,4,5,9,10,A0,A1);//(a,b,c,d) = pinos de saida para o drive;(e,f) = pinos de pwm;(g,h) = pinos de encoder.
