@@ -22,19 +22,23 @@ void loop(){
   /******************************************/
   if(dado == 'F' || radio_dado[0] == 'F'){
     Serial.println("Frente");
-    mobil.forward(PASSOS+6,_PWM);
+    mobil.forward(PASSOS,_PWM);
+    Serial.println("Fim");
   }
   if(dado == 'B' || radio_dado[0] == 'B'){
     Serial.println("Ré");
-    mobil.back(PASSOS+6,_PWM);
+    mobil.back(PASSOS,_PWM);
+    Serial.println("Fim");
   }
   if(dado == 'L' || radio_dado[0] == 'L'){
     Serial.println("Esquerda");
     mobil.left(PASSOS,_PWM);
+    Serial.println("Fim");
   }
   if(dado == 'R' || radio_dado[0] == 'R'){
     Serial.println("Direita");
       mobil.right(PASSOS,_PWM);
+      Serial.println("Fim");
   }
   /******************************************/
   dado = 0;
