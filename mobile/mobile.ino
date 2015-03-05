@@ -33,10 +33,10 @@ public:
   //Construtor
   mobile(uint16_t pL1,uint16_t pL2,uint16_t pR1,uint16_t pR2,uint16_t pwm_L,uint16_t pwm_R,uint16_t enc_L,uint16_t enc_R);//enc_L,enc_R devem ser entradas analógicas
   /***********Funções*************/
-  void forward(uint16_t steps,uint16_t pwm);
-  void left(uint16_t steps,uint16_t pwm);
-  void right(uint16_t steps,uint16_t pwm);
-  void back(uint16_t steps,uint16_t pwm); 
+  void forward_stop(uint16_t steps,uint16_t pwm);
+  void left_stop(uint16_t steps,uint16_t pwm);
+  void right_stop(uint16_t steps,uint16_t pwm);
+  void back_stop(uint16_t steps,uint16_t pwm); 
   void right_direct(uint8_t speed);
   void right_reverse(uint8_t speed);
   void left_direct(uint8_t speed);
@@ -61,7 +61,8 @@ mobile::mobile(uint16_t pL1,uint16_t pL2,uint16_t pR1,uint16_t pR2,uint16_t pwm_
   pinMode(R2,OUTPUT);
 }
 /********************************************************************************************/
-void mobile::forward(uint16_t steps,uint16_t pwm){
+void mobile::forward_stop(uint16_t steps,uint16_t pwm){
+  static uint8_t first=0;//Variavel para determinar qual rodo se movera primeiro.
   encoder_L = 0;//contagem do encoder esquerdo
   encoder_R = 0;//contagem do encoder direito
   uint16_t status_R = ENCODER_READ(analogRead(pin_enc_R),500);//guarda o estado do sensor direito
@@ -69,15 +70,28 @@ void mobile::forward(uint16_t steps,uint16_t pwm){
   boolean flag_L = true,flag_R = true;
   //right_direct(pwm);
   //left_direct(pwm);
+  if(first %2 == 0){
   SPIN_WHEEL(L1,L2);
   SPIN_WHEEL(R1,R2);
-  //uint8_t aux_R = 0,aux_L = 0;
-  //uint8_t speed = pwm;
-  while(encoder_R < steps ||encoder_L < steps ){
-    uint16_t read_R = ENCODER_READ(analogRead(pin_enc_R),500);//real
-    //uint16_t read_R = digitalRead(pin_enc_R);//para simulações
-    //verificar o estado do encoder,caso seja diferente do estado anterior...
-    if(read_R != status_R){
+  Serial.println("Ordem normal");
+  }
+  else{
+  SPIN_WHEEL(L1,L2);
+  SPIN_WHEEL(R1,R2);
+  Serial.println("Ordem inversa");
+  }
+  first++;
+  /*******************************************************************
+            Loop enquanto encoders não atingem a contagem
+  ********************************************************************/
+  while(encoder_R < steps || encoder_L < steps ){
+    
+    
+    //Faz a verificação do estado do encoder
+    uint16_t read_R = ENCODER_READ(analogRead(pin_enc_R),500);
+    
+    //verificar o estado do encoder, caso seja diferente do estado anterior...
+    if(read_R != status_R ){
       encoder_R++;//incremente a variavel
       status_R = read_R;//guarde a atual leitura
       //flag_R = stop_R();//parar roda direita 
@@ -128,7 +142,7 @@ void mobile::forward(uint16_t steps,uint16_t pwm){
   stop_L();
 }
 /********************************************************************************************/
-void mobile::back(uint16_t steps,uint16_t pwm){
+void mobile::back_stop(uint16_t steps,uint16_t pwm){
   encoder_L = 0;
   encoder_R = 0;
   uint16_t status_R = ENCODER_READ(analogRead(pin_enc_R),500);//guarda o estado do sensor direito
@@ -188,7 +202,7 @@ void mobile::back(uint16_t steps,uint16_t pwm){
   stop_L();
 }
 /********************************************************************************************/
-void mobile::left(uint16_t steps,uint16_t pwm){
+void mobile::left_stop(uint16_t steps,uint16_t pwm){
   //Serial.println(pwm);
   analogWrite(pin_pwm_L,pwm);
   analogWrite(pin_pwm_R,pwm);
@@ -252,7 +266,7 @@ void mobile::left(uint16_t steps,uint16_t pwm){
   stop_L();
 }
 /********************************************************************************************/
-void mobile::right(uint16_t steps,uint16_t pwm){
+void mobile::right_stop(uint16_t steps,uint16_t pwm){
   //Serial.println(pwm);
   analogWrite(pin_pwm_L,pwm);
   analogWrite(pin_pwm_R,pwm);
